@@ -18,6 +18,26 @@ http_archive(
     ],
 )
 
+# rules_python arrives transitively at 0.9.0 (from rules_foreign_cc 0.9.0), which
+# predates bzlmod and pins pip 22.0.4. 0.40.0 is deliberate, not the newest: it is
+# the last release that still ships python/pip_install/repositories.bzl (loaded
+# below) and still accepts py_runtime_pair(py2_runtime = ...) (bazel/BUILD.bazel).
+# Both are gone in 1.0.0. Declared here so the maybe() in grpc_deps(),
+# protobuf_deps() and rules_foreign_cc_dependencies() skips theirs.
+http_archive(
+    name = "rules_python",
+    sha256 = "690e0141724abb568267e003c7b6d9a54925df40c275a870a4d934161dc9dd53",
+    strip_prefix = "rules_python-0.40.0",
+    urls = [
+        "https://github.com/bazelbuild/rules_python/releases/download/0.40.0/rules_python-0.40.0.tar.gz",
+    ],
+)
+
+# rules_python >= ~0.23 needs this to create @rules_python_internal; 0.9.0 did not.
+load("@rules_python//python:repositories.bzl", "py_repositories")
+
+py_repositories()
+
 load("@rules_java//java:repositories.bzl", "rules_java_dependencies", "rules_java_toolchains")
 
 rules_java_dependencies()
